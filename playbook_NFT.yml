@@ -1,0 +1,57 @@
+---
+- name: Configure MongoDB replica set
+  hosts: vm_group
+  gather_facts: yes
+  become: yes
+  tasks:
+    - name: Update the package list and install dependencies
+      apt:
+        name: gnupg
+        update_cache: yes
+        state: latest
+
+    - name: Import the MongoDB public GPG key
+      apt_key:
+        url: https://www.mongodb.org/static/pgp/server-4.4.asc
+        state: present
+
+    - name: Add the MongoDB repository
+      apt_repository:
+        repo: "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.4 multiverse"
+        state: present
+
+    - name: Update the package list and install MongoDB
+      apt:
+        name: mongodb-org
+        update_cache: yes
+        state: latest
+
+    - name: Stop the MongoDB service
+      systemd:
+        name: mongod
+        state: stopped
+
+    - name: Update the MongoDB configuration file (bindIp)
+      lineinfile:
+        path: /etc/mongod.conf
+        regexp: '^  bindIp:'
+        line: '  bindIp: 127.0.0.1,{{ ansible_default_ipv4.address }}'
+     
+      notify:
+        - Start MongoDB
+
+    - name: Update the MongoDB configuration file (replication)
+      blockinfile:
+        path: /etc/mongod.conf
+        insertafter: '^# network interfaces$'
+        block: |
+          replication:
+            replSetName: "rs0"
+      notify:
+        - Start MongoDB
+
+  handlers:
+    - name: Start MongoDB
+      systemd:
+        name: mongod
+        state: started

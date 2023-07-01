@@ -1,0 +1,25 @@
+---
+- name: Add instances to MongoDB replica set
+  hosts: vm_group
+  gather_facts: yes
+  tasks:
+    - name: Ensure MongoDB is running
+      service:
+        name: mongod
+        state: started
+
+    - name: Find primary MongoDB instance
+      shell: >
+        mongo --quiet --host {{ item }}:27017 --eval "db.isMaster().primary"
+      register: primary_result
+      with_items: "{{ groups['vm_group'] | map('extract', hostvars, 'ansible_default_ipv4') | map(attribute='address') | list }}"
+      ignore_errors: true
+
+    - name: Set primary MongoDB instance
+      set_fact:
+        primary_mongo: "{{ primary_result.results | selectattr('rc', 'equalto', 0) | map(attribute='stdout') | first }}"
+      run_once: true
+
+    - name: Add instances to replica set
+      shell: >
+        mongo --quiet --host {{ primary_mongo }} --eval "rs.add(\"{{ ansible_default_ipv4.address }}:27017\")"
