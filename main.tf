@@ -53,10 +53,10 @@ locals {
 provider "azurerm" {
   features {}
 
-  subscription_id = "864f0b0e-9580-411a-8908-f029c644a782"
-  client_id       = "aac64bbe-59d0-44a0-a962-cb1e542d31c8"
-  client_secret   = "BdK8Q~INMdLUy2yLKSqmEKdCs3RjNJwv4yZetczO"
-  tenant_id       = "8f0e1988-e976-45c9-8118-89635fb510c6"
+  subscription_id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  client_id       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  client_secret   = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  tenant_id       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 }
 
 terraform {
